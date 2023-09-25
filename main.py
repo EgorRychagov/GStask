@@ -1,7 +1,7 @@
 # request = {
-#     "players_info": { "param": "all", "fields": ["name_player", "team_player", "score_player", "data_role", "id"]},
-#     "polygon_info": {"param":1, "fields":["position"]},
-#     "team_info": {"param": "all", "fields": ["all"]}
+#     "players_info": { "player_id": "_id", "fields": ["name_player", "team_player", "score_player", "data_role"]},
+#     "polygons_info": {"polygon_id": "_id", "fields":["x", "y", "z"]},
+#     "teams_info": {"team_id": "_id", "fields": ["all"]} ##### need to define fields
 # }
     
 # response = {
@@ -15,14 +15,14 @@
 #                 "name_role": "global_role"
 #             },
 #             "id": "1"
-#         },
+#         },# separate request to subrequests
 #         {
 #             "name_player": "verony",
 #             "team_player": "team2",
 #             "score_player": 50,
 #             "data_role":{
 #                 "name_role": "global_role"
-#             },
+#             },  
 #             "id": "2"
 #         }
 #     ],
@@ -45,67 +45,96 @@
 #     ]    
 # }
 
-
 class info_stack:
-    
-    state: str = ""
 
-    info = {}
+    # {"id": {field:value}}
+    _players = {}
+    _polygons = {}
+    _teams = {}
 
-    def get_data(self):
-        return self.state
+    @classmethod
+    def register(self, which_id, _id, fields: {}): # defines an info type + sets fields to id
 
-    def register(self, data_type, get_data):
-        self.info[data_type] = get_data
+        if which_id == "player_id":
+            self._players[_id] = fields
+        elif which_id == "polygon_id":
+            self._polygons[_id] = fields
+        elif which_id == "team_id":
+            self._teams[_id] = fields
+        else:
+            pass
 
-    def pull_one(self, what_to_pull):
-        return self.info[what_to_pull]
+    @staticmethod
+    def pull(self, which_id, _id, fields: list ): # returns a chapter with pulling fields {field: value}
+
+        fields_buf = {} # buffer to contain pulling fields
+
+        if which_id == "player_id":
+            for field in fields:
+                fields_buf[field] = self._players[_id][field]
+            return fields_buf 
+
+        elif which_id == "polygon_id":
+            for field in fields:
+                fields_buf[field] = self._polygons[_id][field]
+            return fields_buf 
+
+        elif which_id == "team_id":
+            for field in fields:
+                fields_buf[field] = self._teams[_id][field]
+            return fields_buf 
+        
+        else:
+            pass
+
+        fields_buf.clear();
 
 class parser:
-    data = info_stack
 
+    # subrequests 
     players_info = {}
     polygons_info = {}
     teams_info = {}
 
+    # fields
     player_fields = []
     polygon_fields = []
     team_fields = []
 
-    def __init__(self, request: dict):
-        self.players_info = request["players_info"]
-        self.polygons_info = request["polygons_info"]
-        self.teams_info = request["teams_info"]
+    def __init__(self):
+        pass
+        
+    def parse(self, request: dict):
 
-        self.player_fields: [] = self.players_info["fields"]
-        self.polygon_fields: [] = self.polygon_fields["fields"]
-        self.team_fields: [] = self.team_fields["fields"]
+        response = {} # will be returned
+        
+        # form the response
+        ## check existing subrequests
+        if "players_info" in request:
+            self.players_info = request["players_info"]
+            self.player_fields = self.players_info["fields"]
 
-    response = {}
+            response_buf = list()
+            # appending chapter {field: value} for single player in a list
+            response_buf.append(info_stack.pull("player_id", self.players_info["player_id"], self.player_fields)) # list of single chapter for now
+            response["players_info"] = response_buf
 
-    def parse(self):
-        self.response["players_info"] = []
-        self.response["teams_info"] = []
-        self.response["polygons_info"] = []
+        elif "polygons_info" in request:
+            self.polygons_info = request["polygons_info"]
+            self.polygon_fields = self.polygons_info["fields"]
 
-        buf_addon = {}
+            response_buf = list()
+            response_buf.append(info_stack.pull("polygon_id", self.polygons_info["polygon_id"], self.polygon_fields)) # single chapter in a list
+            response["polygon_info"] = response_buf
+        
+        elif "teams_info" in request:    
+           self.teams_info = request["teams_info"]
+           self.team_fields = self.teams_info["fields"]
 
-        for field in self.player_fields:
-            buf_addon[field] = self.data.pull_one(field)
-
-        self.response["players_info"].append(buf_addon)
-        buf_addon.clear()
-
-        for field in self.team_fields:
-            buf_addon[field] = self.data.pull_one(field)
-
-        self.response["teams_info"].append(buf_addon)
-        buf_addon.clear()
-
-        for field in self.polygon_fields:
-            buf_addon[field] = self.data.pull_one(field)
-
-        self.response["polygons_info"].append(buf_addon)
-        buf_addon.clear()
+           response_buf = list()
+           response_buf.append(info_stack.pull("team_id", self.teams_info["team_id"], self.polygon_fields)) # single chapter in a list
+           response["teams_info"] = response_buf
+        else:
+            pass
 
         return self.response
