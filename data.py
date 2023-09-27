@@ -2,6 +2,7 @@
 #     "players_info": { "player_id": "_id", "fields": ["name_player", "team_player", "score_player", "data_role"]},
 #     "polygons_info": {"polygon_id": "_id", "fields":["x", "y", "z"]},
 #     "teams_info": {"team_id": "_id", "fields": ["all"]} ##### need to define fields
+#     "server_info": {"server_id": "_id", "fields": ["all"]}
 # }
     
 # response = {
@@ -51,6 +52,7 @@ class info_stack:
     _players = {}
     _polygons = {}
     _teams = {}
+    _servers = {}
 
     @classmethod
     def register(self, which_id, _id, fields: {}): # defines an info type + sets fields to id
@@ -61,10 +63,12 @@ class info_stack:
             self._polygons[_id] = fields
         elif which_id == "team_id":
             self._teams[_id] = fields
+        elif which_id == "server_id":
+            self._servers[_id] = fields
         else:
             pass
 
-    @staticmethod
+    @classmethod
     def pull(self, which_id, _id, fields: list ): # returns a chapter with pulling fields {field: value}
 
         fields_buf = {} # buffer to contain pulling fields
@@ -84,6 +88,11 @@ class info_stack:
                 fields_buf[field] = self._teams[_id][field]
             return fields_buf 
         
+        elif which_id == "server_id":
+            for field in fields:
+                fields_buf[field] = self._servers[_id][field]
+                return fields_buf
+
         else:
             pass
 
@@ -91,50 +100,43 @@ class info_stack:
 
 class parser:
 
-    # subrequests 
-    players_info = {}
-    polygons_info = {}
-    teams_info = {}
-
-    # fields
-    player_fields = []
-    polygon_fields = []
-    team_fields = []
-
     def __init__(self):
         pass
         
     def parse(self, request: dict):
 
         response = {} # will be returned
-        
+        subresponse = list()
+
         # form the response
-        ## check existing subrequests
-        if "players_info" in request:
-            self.players_info = request["players_info"]
-            self.player_fields = self.players_info["fields"]
+        _id: str
+        info_buf: {}
+        fields: []
 
-            response_buf = list()
-            # appending chapter {field: value} for single player in a list
-            response_buf.append(info_stack.pull("player_id", self.players_info["player_id"], self.player_fields)) # list of single chapter for now
-            response["players_info"] = response_buf
+        # run through subrequests
+        for info in request:
+    
+            info_buf = request[info]
+            fields = info_buf["fields"]
 
-        elif "polygons_info" in request:
-            self.polygons_info = request["polygons_info"]
-            self.polygon_fields = self.polygons_info["fields"]
+            if info == "players_info":
+                _id = "player_id"
+            elif info == "polygons_info":
+                _id = "polygon_id"   
+            elif info == "teams_info":
+                _id = "team_id"
+            elif info == "servers_info":
+                _id = "server_id"
+            else:
+                pass
+            
 
-            response_buf = list()
-            response_buf.append(info_stack.pull("polygon_id", self.polygons_info["polygon_id"], self.polygon_fields)) # single chapter in a list
-            response["polygon_info"] = response_buf
-        
-        elif "teams_info" in request:    
-           self.teams_info = request["teams_info"]
-           self.team_fields = self.teams_info["fields"]
+            #subresponse.append(info_stack.pull(_id, info_buf[_id], fields))
+            #response[info] = subresponse
 
-           response_buf = list()
-           response_buf.append(info_stack.pull("team_id", self.teams_info["team_id"], self.polygon_fields)) # single chapter in a list
-           response["teams_info"] = response_buf
-        else:
-            pass
-
-        return self.response
+            response[info] = info_stack.pull(_id, info_buf[_id], fields)
+            #subresponse.clear()
+            #info_buf.clear()
+            #fields.clear()
+            
+        return response
