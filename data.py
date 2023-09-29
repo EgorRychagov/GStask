@@ -1,10 +1,9 @@
 # request = {
-#     "players_info": { "player_id": "_id", "fields": ["name_player", "team_player", "score_player", "data_role"]},
-#     "polygons_info": {"polygon_id": "_id", "fields":["x", "y", "z"]},
-#     "teams_info": {"team_id": "_id", "fields": ["all"]} ##### need to define fields
-#     "server_info": {"server_id": "_id", "fields": ["all"]}
+#     "players_info": { "players_id": ["_id"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+#     "polygons_info": {"polygons_id": ["_id"], "fields":["x", "y", "z"]},
+#     "teams_info": {"teams_id": ["_id"], "fields": ["all"]} ##### need to define fields
+#     "server_info": {"servers_id": ["_id"], "fields": ["all"]}
 # }
-    
 # response = {
 #     "players_info": 
 #     [
@@ -48,55 +47,27 @@
 
 class info_stack:
 
-    # {"id": {field:value}}
-    _players = {}
-    _polygons = {}
-    _teams = {}
-    _servers = {}
-
+    all_data = {}     # {"which_id" : {"_id" : fields}}
+    
     @classmethod
-    def register(self, which_id, _id, fields: {}): # defines an info type + sets fields to id
-
-        if which_id == "player_id":
-            self._players[_id] = fields
-        elif which_id == "polygon_id":
-            self._polygons[_id] = fields
-        elif which_id == "team_id":
-            self._teams[_id] = fields
-        elif which_id == "server_id":
-            self._servers[_id] = fields
-        else:
-            pass
-
+    def register(cls, which_id, _id, fields: {}): # defines an info type + sets fields to id
+        
+        if which_id not in cls.all_data:
+            cls.all_data.update({which_id : {}})
+        cls.all_data[which_id][_id] = fields
+        
     @classmethod
-    def pull(self, which_id, _id, fields: list ): # returns a chapter with pulling fields {field: value}
+    def pull(cls, which_id, _id, fields: list ): # returns a chapter with pulling fields {field: value}
 
         fields_buf = {} # buffer to contain pulling fields
 
-        if which_id == "player_id":
-            for field in fields:
-                fields_buf[field] = self._players[_id][field]
-            return fields_buf 
+        if which_id not in cls.all_data:
+            return {which_id : "not registered"}
 
-        elif which_id == "polygon_id":
-            for field in fields:
-                fields_buf[field] = self._polygons[_id][field]
-            return fields_buf 
+        for field in fields:
+            fields_buf[field] = cls.all_data[which_id][_id][field]
 
-        elif which_id == "team_id":
-            for field in fields:
-                fields_buf[field] = self._teams[_id][field]
-            return fields_buf 
-        
-        elif which_id == "server_id":
-            for field in fields:
-                fields_buf[field] = self._servers[_id][field]
-                return fields_buf
-
-        else:
-            pass
-
-        fields_buf.clear();
+        return fields_buf
 
 class parser:
 
@@ -105,38 +76,30 @@ class parser:
         
     def parse(self, request: dict):
 
-        response = {} # will be returned
         subresponse = list()
 
         # form the response
-        _id: str
+        which_id: str
         info_buf: {}
         fields: []
 
-        # run through subrequests
+        info_to_which_id = {
+            "players_info" : "players_id",
+            "polygons_info" :"polygons_id",
+            "teams_info" : "teams_id",
+            "servers_info" : "servers_id"
+        }
+
+        response = {} # will be returned
+
         for info in request:
     
-            info_buf = request[info]
-            fields = info_buf["fields"]
-
-            if info == "players_info":
-                _id = "player_id"
-            elif info == "polygons_info":
-                _id = "polygon_id"   
-            elif info == "teams_info":
-                _id = "team_id"
-            elif info == "servers_info":
-                _id = "server_id"
-            else:
-                pass
+            which_id = info_to_which_id[info]
             
+            for _id in request[info][which_id]:
+                subresponse.append(info_stack.pull(which_id, _id, request[info]["fields"]))
 
-            #subresponse.append(info_stack.pull(_id, info_buf[_id], fields))
-            #response[info] = subresponse
+            response[info] = subresponse.copy()
+            subresponse.clear()
 
-            response[info] = info_stack.pull(_id, info_buf[_id], fields)
-            #subresponse.clear()
-            #info_buf.clear()
-            #fields.clear()
-            
         return response
