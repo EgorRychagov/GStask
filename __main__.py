@@ -3,64 +3,82 @@ import data
 def test():
     
     # data preparation
-    fields_player_1 = {
-        "name_player" : "deko",
-        "team_player" : "gg_s_0",
-        "score_player" : 27,
-        "data_role" : "what is it"
+    ## player's fields
+    players_fields = list()
+
+    for i in range(5):
+        players_fields.append({
+            "name_player" : i,
+            "team_player" : 1,
+            "score_player" : 10 - i,
+            "data_role" : "smth"
+        })
+
+    for i in range(5):
+        players_fields.append({
+            "name_player" : i+5,
+            "team_player" : 2,
+            "score_player" : 10 - i,
+            "data_role" : "smth"
+        })    
+    ## team's fields
+
+    team_fields_1 = {
+        "team_members" : [0, 1, 2, 3, 4],
+        "team_score" : 30
     }
 
-    fields_player_2 = {
-        "name_player" : "interz",
-        "team_player" : "c9",
-        "score_player" : 23,
-        "data_role" : "what again"
+    team_fields_2 = {
+        "team_members" : [5, 6, 7, 8, 9],
+        "team_score" : 25
     }
 
-    fields_team = {
-        "team_members" : "deko",
-        "team_score" : 13
-    }
+    ## polygon's fields
+    fields_polygon = []
 
-    fields_polygon = {
-        "x" : 3,
-        "y" : 2,
-        "z" : 5
-    }
+    for i in range(20):
+        fields_polygon.append({"x" : i, "y" : i+1, "z" : i+2})
 
+    ## server's fields
     fields_server = {
         "adress" : "Stockholm",
         "ping" : 17
     }
 
     # filling info_stack
+    p_id = 0
+    for player in players_fields:
+        data.info_stack.register("players_id", str(p_id), player)
+        p_id += 1
 
-    data.info_stack.register("players_id", "001", fields_player_1)
-    data.info_stack.register("players_id", "002", fields_player_2)
-    data.info_stack.register("teams_id", "1", fields_team)
-    data.info_stack.register("polygons_id", "001", fields_polygon)
-    data.info_stack.register("servers_id", "1", fields_server)
+    p_id = 0
+    for polygon in fields_polygon:
+        data.info_stack.register("polygons_id", str(p_id), polygon)
+        p_id += 1
 
     # check pulling registered fields - OK
+    p_id = 0
+    players = []
+    for i in range(10):
+        players.append(data.info_stack.pull("players_id", str(i), ["name_player", "team_player"]))
 
-    pull_check = data.info_stack.pull("players_id", "001", ["name_player", "team_player"])
-    print(pull_check)
-    pull_check = data.info_stack.pull("players_id", "002", ["name_player", "team_player"])
-    print(pull_check)
-    pull_check = data.info_stack.pull("teams_id", "1", ["team_score"])
-    print(pull_check)
-    pull_check = data.info_stack.pull("polygons_id", "001", ["x", "y", "z"])
-    print(pull_check)
-    pull_check = data.info_stack.pull("servers_id", "1", ["adress"])
-    print(pull_check)
+    print("PULLED PLAYERS = ", players)
     print()
 
+    polygons = []
+    for i in range(20):
+        polygons.append(data.info_stack.pull("polygons_id",  str(i), ["x", "y"]))
+    print("PULLED POLYGONS = ", polygons)
+
     # request examples
+    
+    print()
+
     request_1 = {
-    "players_info": { "players_id": ["001", "002"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
-    "polygons_info": {"polygons_id": ["001"], "fields": ["x", "y", "z"]},
-    "teams_info": {"teams_id": ["1"], "fields": ["team_members", "team_score"]}, 
-    "servers_info": {"servers_id": ["1"], "fields": ["adress", "ping"]}
+    "players_info": { "players_id": ["0", "1"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+    "polygons_info": {"polygons_id": ["0", "3"], "fields": ["x", "y", "z"]},
+    #"teams_info": {"teams_id": ["1"], "fields": ["team_members", "team_score"]}, 
+    #"servers_info": {"servers_id": ["1"], "fields": ["adress", "ping"]}
     }
 
     # parsing
@@ -69,5 +87,6 @@ def test():
     print("request = ", request_1)
     print()
     print("response = ", response_1)
+    print()
 
 test()

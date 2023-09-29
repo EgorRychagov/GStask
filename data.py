@@ -47,25 +47,28 @@
 
 class info_stack:
 
-    all_data = {}     # {"which_id" : {"_id" : fields}}
-    
+    _all_data = {}  # {"which_id" : {"_id" : fields}}
+        
     @classmethod
     def register(cls, which_id, _id, fields: {}): # defines an info type + sets fields to id
         
-        if which_id not in cls.all_data:
-            cls.all_data.update({which_id : {}})
-        cls.all_data[which_id][_id] = fields
+        if which_id not in cls._all_data:
+            cls._all_data.update({which_id : {}})
+        cls._all_data[which_id][_id] = fields
         
     @classmethod
     def pull(cls, which_id, _id, fields: list ): # returns a chapter with pulling fields {field: value}
 
         fields_buf = {} # buffer to contain pulling fields
 
-        if which_id not in cls.all_data:
+        if which_id not in cls._all_data:
             return {which_id : "not registered"}
 
-        for field in fields:
-            fields_buf[field] = cls.all_data[which_id][_id][field]
+        if _id in cls._all_data[which_id]:
+            for field in fields:
+                fields_buf[field] = cls._all_data[which_id][_id][field]
+        else:
+            return {"id " + str(_id) : "not registered"}
 
         return fields_buf
 
@@ -75,8 +78,6 @@ class parser:
         pass
         
     def parse(self, request: dict):
-
-        subresponse = list()
 
         # form the response
         which_id: str
@@ -90,7 +91,8 @@ class parser:
             "servers_info" : "servers_id"
         }
 
-        response = {} # will be returned
+        response = {} 
+        subresponse = list()
 
         for info in request:
     
