@@ -45,19 +45,27 @@
 #     ]    
 # }
 
-class info_stack:
+class InfoStack:
 
-    _all_data = {}  # {"which_id" : {"_id" : fields}}
+    _all_data = {}  # {"which_id" : {"_id" : fields: dict}
         
     @classmethod
-    def register(cls, which_id, _id, fields: {}): # defines an info type + sets fields to id
+    def register(cls, which_id, _id, fields: dict):
+        'Defines an info type + sets fields to id'
         
         if which_id not in cls._all_data:
             cls._all_data.update({which_id : {}})
-        cls._all_data[which_id][_id] = fields
+        
+        if _id not in cls._all_data[which_id]:
+            cls._all_data[which_id].update({_id : fields})
+            return
+            
+        for field in fields:
+            cls._all_data[which_id][_id].update({field : fields[field]}) 
         
     @classmethod
-    def pull(cls, which_id, _id, fields: list ): # returns a chapter with pulling fields {field: value}
+    def pull(cls, which_id, _id, fields: list):
+        'Returns a chapter with pulling fields {field: value}'
 
         fields_buf = {} # buffer to contain pulling fields
 
@@ -68,11 +76,11 @@ class info_stack:
             for field in fields:
                 fields_buf[field] = cls._all_data[which_id][_id][field]
         else:
-            return {"id " + str(_id) : "not registered"}
+            return {which_id + " " + str(_id) : "not registered"}
 
         return fields_buf
 
-class parser:
+class Parser:
 
     def __init__(self):
         pass
@@ -99,7 +107,7 @@ class parser:
             which_id = info_to_which_id[info]
             
             for _id in request[info][which_id]:
-                subresponse.append(info_stack.pull(which_id, _id, request[info]["fields"]))
+                subresponse.append(InfoStack.pull(which_id, _id, request[info]["fields"]))
 
             response[info] = subresponse.copy()
             subresponse.clear()

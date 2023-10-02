@@ -1,92 +1,93 @@
 import data
 
 def test():
-    
-    # data preparation
-    ## player's fields
-    players_fields = list()
+    # creating fields for each type of entity
+    fields_for_players = []
 
-    for i in range(5):
-        players_fields.append({
-            "name_player" : i,
-            "team_player" : 1,
-            "score_player" : 10 - i,
+    ##### player's ID RANGE: team_1: [1 TO 5], team_2: [6 to 10]
+    for _id in range(5):
+        fields_for_players.append({
+            "name_player" : str(_id),
+            "team_player" : "team_1",
+            "score_player" : "example",
+            "data_role" : "smth"
+        })
+    for _id in range(5, 10):
+        fields_for_players.append({
+            "name_player" : str(_id),
+            "team_player" : "team_2",
+            "score_player" : "example",
             "data_role" : "smth"
         })
 
-    for i in range(5):
-        players_fields.append({
-            "name_player" : i+5,
-            "team_player" : 2,
-            "score_player" : 10 - i,
-            "data_role" : "smth"
-        })    
-    ## team's fields
+    print(fields_for_players)
+    print()
 
-    team_fields_1 = {
-        "team_members" : [0, 1, 2, 3, 4],
+    ##### TEAMS 
+    team_1_fields = {
+        "team_members" : ["1", "2", "3", "4", "5"],
         "team_score" : 30
     }
 
-    team_fields_2 = {
-        "team_members" : [5, 6, 7, 8, 9],
+    team_2_fields = {
+        "team_members" : ["6", "7", "8", "9", "10"],
         "team_score" : 25
     }
 
-    ## polygon's fields
+    ##### POLYGONS (independent for now)
     fields_polygon = []
 
     for i in range(20):
         fields_polygon.append({"x" : i, "y" : i+1, "z" : i+2})
 
-    ## server's fields
-    fields_server = {
+
+    ##### SERVERS (2 for now)
+    server_1_fields = {
         "adress" : "Stockholm",
+        "ping" : 17
+    }    
+
+    server_2_fields = {
+        "adress" : "Chista",
         "ping" : 17
     }
 
-    # filling info_stack
-    p_id = 0
-    for player in players_fields:
-        data.info_stack.register("players_id", str(p_id), player)
-        p_id += 1
+    # data registration
 
-    p_id = 0
-    for polygon in fields_polygon:
-        data.info_stack.register("polygons_id", str(p_id), polygon)
-        p_id += 1
+    ##### PLAYERS
+    for _id in range(10):
+        data.InfoStack.register("players_id", str(_id), fields_for_players[_id])
 
-    # check pulling registered fields - OK
-    p_id = 0
-    players = []
-    for i in range(10):
-        players.append(data.info_stack.pull("players_id", str(i), ["name_player", "team_player"]))
 
-    print("PULLED PLAYERS = ", players)
-    print()
-
-    polygons = []
-    for i in range(20):
-        polygons.append(data.info_stack.pull("polygons_id",  str(i), ["x", "y"]))
-    print("PULLED POLYGONS = ", polygons)
-
-    # request examples
+    ##### TEAMS
     
-    print()
 
+    ##### POLYGONS
+    
+    ##### SERVERS 
+    
+    # requests
     request_1 = {
-    "players_info": { "players_id": ["0", "1"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
-    "polygons_info": {"polygons_id": ["0", "3"], "fields": ["x", "y", "z"]},
+    "players_info": { "players_id": ["1", "7"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+    #"polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
+    #"teams_info": {"teams_id": ["1"], "fields": ["team_members", "team_score"]}, 
+    #"servers_info": {"servers_id": ["1"], "fields": ["adress", "ping"]}
+    }
+    request_2 = {
+    "players_info": { "players_id": ["11", "5"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+    #"polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
     #"teams_info": {"teams_id": ["1"], "fields": ["team_members", "team_score"]}, 
     #"servers_info": {"servers_id": ["1"], "fields": ["adress", "ping"]}
     }
 
     # parsing
-    process = data.parser()
-    response_1 = process.parse(request_1)
-    print("request = ", request_1)
+    test = data.Parser()
+    
+    print("response 1 = ", test.parse(request_1))
     print()
-    print("response = ", response_1)
+
+    print("response 2 = ", test.parse(request_2))
     print()
+    pass
 
 test()
