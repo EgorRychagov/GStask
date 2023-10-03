@@ -84,7 +84,7 @@ class InfoStack:
         'Returns a chapter with pulling fields {field: value}'
 
         which_id: any
-        _id: any = 0gi
+        _id: any = 0
         pos = 0
         for info in id_info:
             if pos == 0:
