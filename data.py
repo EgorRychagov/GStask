@@ -47,25 +47,51 @@
 
 class InfoStack:
 
-    _all_data = {}  # {"which_id" : {"_id" : fields: dict}
+    _all_data = {}  # {"which_id" : {"_id" : fields: dict} or {"servers_id": {fields: dict}}
         
     @classmethod
-    def register(cls, which_id, _id, fields: dict):
+    def register(cls, fields: dict, **id_info):
         'Defines an info type + sets fields to id'
-        
+
+        which_id: any
+        _id: any = 0
+        pos = 0
+        for info in id_info:
+            if pos == 0:
+                which_id = id_info[info]
+                pos += 1
+            else:
+                _id == id_info[info]
+
         if which_id not in cls._all_data:
             cls._all_data.update({which_id : {}})
         
         if _id not in cls._all_data[which_id]:
             cls._all_data[which_id].update({_id : fields})
             return
-            
+        
+        if which_id == "servers_id":
+            for field in fields:
+                cls._all_data[which_id].update({field : fields[field]}) 
+            return
+        
         for field in fields:
-            cls._all_data[which_id][_id].update({field : fields[field]}) 
+            cls._all_data[which_id][_id].update({field : fields[field]})
+        return 
         
     @classmethod
-    def pull(cls, which_id, _id, fields: list):
+    def pull(cls, fields: list, **id_info):
         'Returns a chapter with pulling fields {field: value}'
+
+        which_id: any
+        _id: any = 0gi
+        pos = 0
+        for info in id_info:
+            if pos == 0:
+                which_id = id_info[info]
+                pos += 1
+            else:
+                _id == id_info[info]
 
         fields_buf = {} # buffer to contain pulling fields
 
@@ -103,13 +129,17 @@ class Parser:
         subresponse = list()
 
         for info in request:
-    
-            which_id = info_to_which_id[info]
             
-            for _id in request[info][which_id]:
-                subresponse.append(InfoStack.pull(which_id, _id, request[info]["fields"]))
+            which_id = info_to_which_id[info]
+    
+            if info != "servers_info":
+                
+                for _id in request[info][which_id]:
+                    subresponse.append(InfoStack.pull(request[info]["fields"], id_name = which_id, id_inst = _id))
 
-            response[info] = subresponse.copy()
-            subresponse.clear()
+                response[info] = subresponse.copy()
+                subresponse.clear()
+            else:
+                response[info] = InfoStack.pull(request[info]["fields"], id_name = which_id)
 
         return response
