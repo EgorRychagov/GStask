@@ -128,8 +128,8 @@ class Parser:
                 return {"requested info": "incorrect"}
             
             id_name = info_to_name_id[info]
-            if id_name != request[info]:
-                return {"requested id name": "incorrect"}
+            if id_name not in request[info]:
+               return {"requested id name": "incorrect"}
 
             if info != "servers_info":
                 
