@@ -1,6 +1,7 @@
 import data
 
 def regTest():
+    print("REG TEST:\n")
     # PLAYERS
     players_fields = []
 
@@ -19,8 +20,8 @@ def regTest():
             "data_role" : "smth"
         })
 
-    for _id in range(10):
-        data.InfoStack.register(players_fields[_id], id_name = "players_id", id_inst = str(_id))
+    for i in range(10):
+        data.InfoStack.register(players_fields[i], which_id = "players_id", _id = str(i))
 
     # TEAMS 
     team_1_fields = {
@@ -33,8 +34,8 @@ def regTest():
         "team_score" : 25
     }
 
-    data.InfoStack.register(team_1_fields, id_name = "teams_id", id_inst = "team_1")
-    data.InfoStack.register(team_2_fields, id_name = "teams_id", id_inst = "team_2")
+    data.InfoStack.register(team_1_fields, which_id = "teams_id", _id = "team_1")
+    data.InfoStack.register(team_2_fields, which_id = "teams_id", _id = "team_2")
 
     # POLYGONS 
     polygon_fields = []
@@ -43,7 +44,7 @@ def regTest():
         polygon_fields.append({"x" : i, "y" : i+1, "z" : i+2})
 
     for i in range(20):
-        data.InfoStack.register(polygon_fields[i], id_name = "polygons_id", id_inst = i)
+        data.InfoStack.register(polygon_fields[i], which_id = "polygons_id", _id = i)
 
     # SERVERS 
     server_fields = {
@@ -52,45 +53,38 @@ def regTest():
         "workload" : 7
     }    
 
-    data.InfoStack.register(server_fields, id_name = "servers_id")
+    data.InfoStack.register(server_fields, which_id = "servers_id")
 
     print("\nData was registered\n")
 
 def pullTest():
-    print("PULLING:\n")
+    print("PULL TEST:\n")
 
     print("1) Existing data / all fields: \n")
-    print("player = ", data.InfoStack.pull(["name_player", "score_player", "team_player", "data_role"], id_name = "players_id", id_inst = "3"))
-    print("team = ", data.InfoStack.pull(["team_members", "team_score"], id_name = "teams_id", id_inst = "team_1"))
-    print("polygon = ", data.InfoStack.pull(["x", "y"], id_name = "polygons_id", id_inst = 2))
-    print("server = ", data.InfoStack.pull(["adress", "workload"], id_name = "servers_id"), "\n")
+    print("player = ", data.InfoStack.pull(["name_player", "score_player", "team_player", "data_role"], which_id = "players_id", _id = "3"))
+    print("team = ", data.InfoStack.pull(["team_members", "team_score"], which_id = "teams_id", _id = "team_1"))
+    print("polygon = ", data.InfoStack.pull(["x", "y"], which_id = "polygons_id", _id = 2))
+    print("server = ", data.InfoStack.pull(["adress", "workload"], which_id = "servers_id"), "\n")
 
+    print("2) Abscent data included\n")
+    print(data.InfoStack.pull(["name_player", "team_player"], which_id = "players_id", _id = 5)) #id not registered
+    print()
     pass
 
 def requestTest():
 
     request_1 = {
     "players_info": { "players_id": ["1", "7"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
-    #"polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
-    #"teams_info": {"teams_id": ["1"], "fields": ["team_members", "team_score"]}, 
+    "polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
+    "teams_info": {"teams_id": ["team_1"], "fields": ["team_members", "team_score"]}, 
     "servers_info": {"fields": ["adress", "capacity"]}
     }
-    request_2 = {
-    "players_info": { "players_id": ["11", "5"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
-    #"polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
-    #"teams_info": {"teams_id": ["1"], "fields": ["team_members", "team_score"]}, 
-    "servers_info": {"fields": ["adress", "workload"]}
-    }
+    
 
     # parsing
     test = data.Parser()
     
-    print("response 1 = ", test.parse(request_1))
-    print()
-
-    print("response 2 = ", test.parse(request_2))
-    print()
-    
+    print("response 1 = ", test.parse(request_1), "\n")
     pass
 
 regTest()

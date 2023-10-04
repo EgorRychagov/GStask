@@ -50,29 +50,24 @@ class InfoStack:
     _all_data = {}  # {"which_id" : {"_id" : fields: dict} or {"servers_id": {fields: dict}}
         
     @classmethod
-    def register(cls, fields: dict, **id_info):
+    def register(cls, fields: dict, **kwargs):
         'Defines an info type + sets fields to id'
 
-        which_id: any
-        _id: any = 0
-        pos = 0
-        for info in id_info:
-            if pos == 0:
-                which_id = id_info[info]
-                pos += 1
-            else:
-                _id == id_info[info]
+        which_id = kwargs['which_id']
+        _id: any = -1
+        if '_id' in kwargs:
+            _id = kwargs['_id']
 
         if which_id not in cls._all_data:
             cls._all_data.update({which_id : {}})
         
-        if _id not in cls._all_data[which_id]:
-            cls._all_data[which_id].update({_id : fields})
-            return
-        
         if which_id == "servers_id":
             for field in fields:
                 cls._all_data[which_id].update({field : fields[field]}) 
+            return
+        
+        if _id not in cls._all_data[which_id]:
+            cls._all_data[which_id].update({_id : fields})
             return
         
         for field in fields:
@@ -80,23 +75,23 @@ class InfoStack:
         return 
         
     @classmethod
-    def pull(cls, fields: list, **id_info):
+    def pull(cls, fields: list, **kwargs):
         'Returns a chapter with pulling fields {field: value}'
 
-        which_id: any
-        _id: any = 0
-        pos = 0
-        for info in id_info:
-            if pos == 0:
-                which_id = id_info[info]
-                pos += 1
-            else:
-                _id == id_info[info]
+        which_id = kwargs['which_id']
+        _id: any = -1
+        if '_id' in kwargs:
+            _id = kwargs['_id']
 
         fields_buf = {} # buffer to contain pulling fields
 
         if which_id not in cls._all_data:
             return {which_id : "not registered"}
+        
+        if which_id == "servers_id":
+            for field in fields:
+                fields_buf[field] = cls._all_data[which_id][field]
+            return fields_buf
 
         if _id in cls._all_data[which_id]:
             for field in fields:
@@ -114,11 +109,11 @@ class Parser:
     def parse(self, request: dict):
 
         # form the response
-        which_id: str
+        id_name: str
         info_buf: {}
         fields: []
 
-        info_to_which_id = {
+        info_to_name_id = {
             "players_info" : "players_id",
             "polygons_info" :"polygons_id",
             "teams_info" : "teams_id",
@@ -130,16 +125,16 @@ class Parser:
 
         for info in request:
             
-            which_id = info_to_which_id[info]
+            id_name = info_to_name_id[info]
     
             if info != "servers_info":
                 
-                for _id in request[info][which_id]:
-                    subresponse.append(InfoStack.pull(request[info]["fields"], id_name = which_id, id_inst = _id))
+                for id_inst in request[info][id_name]:
+                    subresponse.append(InfoStack.pull(request[info]["fields"], which_id = id_name, _id = id_inst))
 
                 response[info] = subresponse.copy()
                 subresponse.clear()
             else:
-                response[info] = InfoStack.pull(request[info]["fields"], id_name = which_id)
+                response[info] = InfoStack.pull(request[info]["fields"], which_id = id_name)
 
         return response
