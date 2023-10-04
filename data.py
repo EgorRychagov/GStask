@@ -117,7 +117,7 @@ class Parser:
             "players_info" : "players_id",
             "polygons_info" :"polygons_id",
             "teams_info" : "teams_id",
-            "servers_info" : "servers_id"
+            "servers_info" : "fields"
         }
 
         response = {} 
@@ -128,7 +128,7 @@ class Parser:
                 return {"requested info": "incorrect"}
             
             id_name = info_to_name_id[info]
-            if id_name not in request[info] and id_name != "servers_id":
+            if id_name not in request[info]:
                return {"requested id name": "incorrect"}
 
             if info != "servers_info":
