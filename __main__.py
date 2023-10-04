@@ -103,7 +103,7 @@ def requestTest():
     }
 
     print("response 2 = ", test.parse(request_3), "\n")
-    print("4) Incorrect id name in info was requested:\n")
+    print("4) Incorrect id name was requested:\n")
 
     request_4 = {
         "players_info": { "false id": ["1", "-5"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
