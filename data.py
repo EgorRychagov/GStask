@@ -48,7 +48,7 @@
 class InfoStack:
 
     _all_data = {}  # {"which_id" : {"_id" : fields: dict} or {"servers_id": {fields: dict}}
-        
+    
     @classmethod
     def register(cls, fields: dict, **kwargs):
         'Defines an info type + sets fields to id'
@@ -124,9 +124,13 @@ class Parser:
         subresponse = list()
 
         for info in request:
+            if info not in info_to_name_id:
+                return {"requested info": "incorrect"}
             
             id_name = info_to_name_id[info]
-    
+            if id_name != request[info]:
+                return {"requested id name": "incorrect"}
+
             if info != "servers_info":
                 
                 for id_inst in request[info][id_name]:

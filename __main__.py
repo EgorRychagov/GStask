@@ -72,20 +72,44 @@ def pullTest():
     pass
 
 def requestTest():
+    print("REQUEST TEST:\n")
+    print("1) All the data exists\n")
+
+    test = data.Parser()
 
     request_1 = {
-    "players_info": { "players_id": ["1", "7"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
-    "polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
-    "teams_info": {"teams_id": ["team_1"], "fields": ["team_members", "team_score"]}, 
-    "servers_info": {"fields": ["adress", "capacity"]}
+        "players_info": { "players_id": ["1", "7"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+        "polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
+        "teams_info": {"teams_id": ["team_1"], "fields": ["team_members", "team_score"]}, 
+        "servers_info": {"fields": ["adress", "capacity"]}
     }
-    
 
-    # parsing
-    test = data.Parser()
-    
     print("response 1 = ", test.parse(request_1), "\n")
-    pass
+    print("2) Not registered data requested\n")
+    
+    request_2 = {
+        "players_info": { "players_id": ["1", "-5"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+        "polygons_info": {"polygons_id": [5, 9, 33], "fields": ["x", "y", "z"]}
+    }
+
+    print("response 2 = ", test.parse(request_2), "\n")
+    print("3) Incorrect info in request\n")
+
+    request_3 = {
+        "polnaya": { "players_id": ["1", "7"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+        "shnyaga": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
+        "prosto": {"teams_id": ["team_1"], "fields": ["team_members", "team_score"]}, 
+        "uzhas": {"fields": ["adress", "capacity"]}
+    }
+
+    print("response 2 = ", test.parse(request_3), "\n")
+    print("4) Incorrect id name in info was requested:\n")
+
+    request_4 = {
+        "players_info": { "false id": ["1", "-5"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
+    }
+
+    print("response 4 = ", test.parse(request_4), "\n")
 
 regTest()
 pullTest()
