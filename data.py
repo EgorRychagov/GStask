@@ -47,7 +47,7 @@
 
 class InfoStack:
 
-    _all_data = {}  # {"which_id" : {"_id" : fields: dict} or {"servers_id": {fields: dict}}
+    _all_data = {}  # {"which_id" : {"_id" : fields: dict} or {"servers_id": {fields: dict}} 
     
     @classmethod
     def register(cls, fields: dict, **kwargs):
@@ -55,24 +55,29 @@ class InfoStack:
 
         which_id = kwargs['which_id']
         _id: any = -1
+        paramless: bool = False
+
         if '_id' in kwargs:
             _id = kwargs['_id']
+        else:
+            paramless = True
 
         if which_id not in cls._all_data:
             cls._all_data.update({which_id : {}})
-        
-        if which_id == "servers_id":
+
+        if not paramless:
+            if _id not in cls._all_data[which_id]:
+                cls._all_data[which_id].update({_id : fields})
+                return
+            
             for field in fields:
-                cls._all_data[which_id].update({field : fields[field]}) 
-            return
+                cls._all_data[which_id][_id].update({field : fields[field]})
+            return 
         
-        if _id not in cls._all_data[which_id]:
-            cls._all_data[which_id].update({_id : fields})
-            return
-        
-        for field in fields:
-            cls._all_data[which_id][_id].update({field : fields[field]})
-        return 
+        for field in fields: # paramless case
+            cls._all_data[which_id].update({field : fields[field]}) 
+        return
+    
         
     @classmethod
     def pull(cls, fields: list, **kwargs):
@@ -80,25 +85,28 @@ class InfoStack:
 
         which_id = kwargs['which_id']
         _id: any = -1
+        paramless: bool = False
+
         if '_id' in kwargs:
             _id = kwargs['_id']
+        else:
+            paramless = True
 
         fields_buf = {} # buffer to contain pulling fields
 
         if which_id not in cls._all_data:
             return {which_id : "not registered"}
         
-        if which_id == "servers_id":
-            for field in fields:
-                fields_buf[field] = cls._all_data[which_id][field]
-            return fields_buf
+        if not paramless:
+            if _id in cls._all_data[which_id]:
+                for field in fields:
+                    fields_buf[field] = cls._all_data[which_id][_id][field]
+                return fields_buf
+            else:
+                return {which_id + " " + str(_id) : "not registered"}
 
-        if _id in cls._all_data[which_id]:
-            for field in fields:
-                fields_buf[field] = cls._all_data[which_id][_id][field]
-        else:
-            return {which_id + " " + str(_id) : "not registered"}
-
+        for field in fields: # paramless case
+            fields_buf[field] = cls._all_data[which_id][field]
         return fields_buf
 
 class Parser:
@@ -117,7 +125,12 @@ class Parser:
             "players_info" : "players_id",
             "polygons_info" :"polygons_id",
             "teams_info" : "teams_id",
-            "servers_info" : "fields"
+            "servers_info" : "fields",
+            "extra_paramless_info" : "fields"
+        }
+        paramless = {
+            "servers_info" : "servers_id",
+            "extra_paramless_info" : "extra_id"
         }
 
         response = {} 
@@ -128,17 +141,17 @@ class Parser:
                 return {"requested info": "incorrect"}
             
             id_name = info_to_name_id[info]
+
             if id_name not in request[info]:
                return {"requested id name": "incorrect"}
 
-            if info != "servers_info":
-                
+            if info not in paramless:
                 for id_inst in request[info][id_name]:
                     subresponse.append(InfoStack.pull(request[info]["fields"], which_id = id_name, _id = id_inst))
 
                 response[info] = subresponse.copy()
                 subresponse.clear()
             else:
-                response[info] = InfoStack.pull(request[info]["fields"], which_id = id_name)
+                response[info] = InfoStack.pull(request[info]["fields"], which_id = paramless[info])
 
         return response

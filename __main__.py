@@ -55,7 +55,16 @@ def regTest():
 
     data.InfoStack.register(server_fields, which_id = "servers_id")
 
-    print("\nData was registered\n")
+    # EXTRA PARAMLESS INFO
+
+    extra_fields = {
+        "something" : "dskaod",
+        "more fields" : "huwq"
+    }
+
+    data.InfoStack.register(extra_fields, which_id = "extra_id")
+
+    print("Data was registered\n")
 
 def pullTest():
     print("PULL TEST:\n")
@@ -67,9 +76,11 @@ def pullTest():
     print("server = ", data.InfoStack.pull(["adress", "workload"], which_id = "servers_id"), "\n")
 
     print("2) Abscent data included\n")
-    print(data.InfoStack.pull(["name_player", "team_player"], which_id = "players_id", _id = 5)) #id not registered
-    print()
-    pass
+    print(data.InfoStack.pull(["name_player", "team_player"], which_id = "players_id", _id = 5), "\n")  #id not registered
+
+
+    print("3) Extra paramless info\n")
+    print("extra_paramless_info = ", data.InfoStack.pull(["something"], which_id = "extra_id"), "\n")
 
 def requestTest():
     print("REQUEST TEST:\n")
@@ -81,10 +92,11 @@ def requestTest():
         "players_info": { "players_id": ["1", "7"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
         "polygons_info": {"polygons_id": [5, 9, 17], "fields": ["x", "y", "z"]},
         "teams_info": {"teams_id": ["team_1"], "fields": ["team_members", "team_score"]}, 
-        "servers_info": {"fields": ["adress", "capacity"]}
+        "servers_info": {"fields": ["adress", "capacity"]},
+        "extra_paramless_info" : {"fields": ["something"]}
     }
 
-    print("response 1 = ", test.parse(request_1), "\n")
+    print("response 1 (with extra paramless info) = ", test.parse(request_1), "\n")
     print("2) Not registered data requested\n")
     
     request_2 = {
