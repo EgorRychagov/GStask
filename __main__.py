@@ -1,6 +1,11 @@
 import data
 
 def regTest():
+    # REAL TIME DATA PROCESSING
+    print("REAL TIME PROCESSING")
+    data.InfoStack.register(data.InfoStack.getValue(), which_id = "players_id", _id = "11")
+    print("Real time registered = ", data.InfoStack.pull(["name_player", "team_player"], which_id = "players_id", _id = "11"), "\n")
+
     print("REG TEST:\n")
     # PLAYERS
     players_fields = []

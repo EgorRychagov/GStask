@@ -1,54 +1,20 @@
-# request = {
-#     "players_info": { "players_id": ["_id"], "fields": ["name_player", "team_player", "score_player", "data_role"]},
-#     "polygons_info": {"polygons_id": ["_id"], "fields":["x", "y", "z"]},
-#     "teams_info": {"teams_id": ["_id"], "fields": ["all"]} ##### need to define fields
-#     "server_info": {"servers_id": ["_id"], "fields": ["all"]}
-# }
-# response = {
-#     "players_info": 
-#     [
-#         {
-#             "name_player": "clickname",
-#             "team_player": "team1",
-#             "score_player": 100,
-#             "data_role":{
-#                 "name_role": "global_role"
-#             },
-#             "id": "1"
-#         },# separate request to subrequests
-#         {
-#             "name_player": "verony",
-#             "team_player": "team2",
-#             "score_player": 50,
-#             "data_role":{
-#                 "name_role": "global_role"
-#             },  
-#             "id": "2"
-#         }
-#     ],
-
-#     "teams_info":
-#     [
-#         {
-#             "name_team": "team1",
-#             "id_players":[]
-#         },
-#         {
-#             "name_team": "team2",
-#             "id_players":[]
-#         }
-#     ],
-
-#     "polygon_info": 
-#     [
-#         {"position": [1, 1, 1]}
-#     ]    
-# }
-
 class InfoStack:
 
     _all_data = {}  # {"which_id" : {"_id" : fields: dict} or {"servers_id": {fields: dict}} 
     
+    @classmethod
+    def getValue(cls): # "field1 = value, field2 = value ..."
+        print("Fields: 'field = value, ...' ", end = "")
+        fields_str: str = input()
+        fields = {}
+        fields_sep : list = fields_str.split(", ")
+
+        for subfield in fields_sep:
+            splitted: list = subfield.split(" = ")
+            fields.update({splitted[0]: splitted[1]})
+
+        return fields
+
     @classmethod
     def register(cls, fields: dict, **kwargs):
         'Defines an info type + sets fields to id'
