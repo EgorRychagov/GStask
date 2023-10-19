@@ -59,7 +59,11 @@ request = {
     "player": {"_id" : ["1", "2"], "fields" : ["name", "team"]},
     "server" : {"fields" : ["capacity", "adress"]}
            }
-parser = data_shell.Parser
 
+parser = data_shell.Parser(request)
 print("\tRequest = ", request)
-print("\tResponse = ", parser.parse(request))
+print("\tResponse = ", parser.response)
+
+player_1.name = "CHANGED_NAME"
+data_shell.InfoStack.register("player", "name", player_1.get_name, "1")
+print("\n\tResponse after updating data = ", parser.get_response())

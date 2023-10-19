@@ -1,26 +1,43 @@
 class InfoStack:
     all_data = {}
+# {
+#   nature :    {
+#                  _id  :       {
+#                               field : value
+#                               }
+#               }
+#   nature :    {
+#                   field : value
+#               }
+# }
 
-    # {
-    #   nature :    {
-    #                  _id  :       {
-    #                               field : value
-    #                               }
-    #               }
-    #   nature :    {
-    #                   field : value
-    #               }
-    # }
-
+    responses = {}
+    index = 0
+    evoke = False
+    
     @classmethod
     def register(cls, nature, field, value_getter, _id = ""):
         if nature not in cls.all_data:
             cls.all_data.update({nature : {}})
-
+        
         if _id == "":
             cls.all_data[nature].update({field : value_getter})
 
         cls.all_data[nature].update({_id : {field : value_getter}})
+        
+        # updating responses
+#        response = {
+#           nature : {"id" : {fields : values}}
+#           nature : {fields : values}
+#              }
+        
+        if cls.evoke:
+            for index in cls.responses:
+                if nature in cls.responses[index]:
+                    if _id in cls.responses[index][nature]:
+                        cls.responses[index][nature][_id].update({field : value_getter()})
+                        return
+                    cls.responses[index][nature].update({field : value_getter()})
 
     @classmethod
     def pull(cls, nature, field = "", _id = "") -> dict:
@@ -44,11 +61,24 @@ class InfoStack:
 class Parser:
 #   request = {
 #           nature : {"_id" : [], "fields" : []}
+#           nature : {"fields" : []}
 #             }
 #   response = {
 #           nature : {"id" : {fields : values}}
+#           nature : {fields : values}
 #              }
-    def parse(request: dict):
+
+    def __init__(self, request: dict):
+        self.response = Parser.parse(request)
+        InfoStack.evoke = True
+        InfoStack.responses.update({InfoStack.index : self.response})
+        InfoStack.index += 1
+
+    def get_response(self):
+        return self.response
+
+    @classmethod
+    def parse(cls, request: dict):
         response = {}
         subr_list = {}
         subresponse = {}
