@@ -60,10 +60,10 @@ request = {
     "server" : {"fields" : ["capacity", "adress"]}
            }
 
-parser = data_shell.Parser(request)
-print("\tRequest = ", request)
-print("\tResponse = ", parser.response)
-
-player_1.name = "CHANGED_NAME"
+parser = data_shell.Parser()
+data_shell.InfoStack.request_reg("request_1", request)
+print("\t1) Pulling registered request:", data_shell.InfoStack.request_pull("request_1"))
+print("\t2) Getting prepared response:", data_shell.InfoStack.responses["request_1"])
+player_1.name = "OTHER NAME"
 data_shell.InfoStack.register("player", "name", player_1.get_name, "1")
-print("\n\tResponse after updating data = ", parser.get_response())
+print("\t3) Getting response after changing player's name:", data_shell.InfoStack.responses["request_1"])

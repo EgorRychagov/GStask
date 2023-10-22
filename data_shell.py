@@ -1,19 +1,17 @@
 class InfoStack:
     all_data = {}
+    requests = {}
+    responses = {}
 # {
 #   nature :    {
 #                  _id  :       {
-#                               field : value
+#                               field : value_getter
 #                               }
 #               }
 #   nature :    {
-#                   field : value
+#                   field : value_getter
 #               }
 # }
-
-    responses = {}
-    index = 0
-    evoke = False
     
     @classmethod
     def register(cls, nature, field, value_getter, _id = ""):
@@ -24,20 +22,19 @@ class InfoStack:
             cls.all_data[nature].update({field : value_getter})
 
         cls.all_data[nature].update({_id : {field : value_getter}})
-        
+     
         # updating responses
 #        response = {
 #           nature : {"id" : {fields : values}}
 #           nature : {fields : values}
 #              }
         
-        if cls.evoke:
-            for index in cls.responses:
-                if nature in cls.responses[index]:
-                    if _id in cls.responses[index][nature]:
-                        cls.responses[index][nature][_id].update({field : value_getter()})
-                        return
-                    cls.responses[index][nature].update({field : value_getter()})
+        for name in cls.responses:
+            if nature in cls.responses[name]:
+                if _id in cls.responses[name][nature]:
+                    cls.responses[name][nature][_id].update({field : value_getter()})
+                    return
+                cls.responses[name][nature].update({field : value_getter()})
 
     @classmethod
     def pull(cls, nature, field = "", _id = "") -> dict:
@@ -57,6 +54,17 @@ class InfoStack:
         
         return {"field = " + str(field) : "not registered"}
         
+    @classmethod
+    def request_reg(cls, name, request: dict):
+        cls.requests.update({name : request})
+        cls.responses.update({name : Parser.parse(request).copy()})
+
+    @classmethod
+    def request_pull(cls, name):
+        if name not in cls.requests:
+            return {"request = " + str(name) : "not registered"}
+        return cls.requests[name]
+        
 
 class Parser:
 #   request = {
@@ -64,18 +72,15 @@ class Parser:
 #           nature : {"fields" : []}
 #             }
 #   response = {
-#           nature : {"id" : {fields : values}}
-#           nature : {fields : values}
+#           nature : {"id" : {fields : value_getters}}
+#           nature : {fields : value_getters}
 #              }
+#   responses = {
+#               request name : response with value_getters
+#               }
 
-    def __init__(self, request: dict):
-        self.response = Parser.parse(request)
-        InfoStack.evoke = True
-        InfoStack.responses.update({InfoStack.index : self.response})
-        InfoStack.index += 1
-
-    def get_response(self):
-        return self.response
+    def __init__(cls):
+        pass
 
     @classmethod
     def parse(cls, request: dict):
