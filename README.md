@@ -38,9 +38,9 @@ Specify `id` and `fields` in lists to request these fields of several objects
 
 ## Functionals
 - class *InfoStack*
->- `register()` - registeres entitie's properties and automatically updates responses
+>- `register()` - registers entitie's properties and automatically updates responses
 >- `pull()` - gets a value by field
->- `request_reg()` - registeres a request by name
+>- `request_reg()` - registers a request by name
 >- `request_pull()` - pulls request by name
 >- `response_pull()` - pulls response (always up to date) by the name of request 
 - class *Parser*
