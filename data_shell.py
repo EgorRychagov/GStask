@@ -60,10 +60,16 @@ class InfoStack:
         cls.responses.update({name : Parser.parse(request).copy()})
 
     @classmethod
-    def request_pull(cls, name):
+    def request_pull(cls, name) -> dict:
         if name not in cls.requests:
             return {"request = " + str(name) : "not registered"}
         return cls.requests[name]
+    
+    @classmethod
+    def response_pull(cls, name) -> dict:
+        if name not in cls.requests:
+            return {"response " + str(name) : "no request registered"}
+        return cls.responses[name]
         
 
 class Parser:
@@ -83,7 +89,7 @@ class Parser:
         pass
 
     @classmethod
-    def parse(cls, request: dict):
+    def parse(cls, request: dict) -> dict:
         response = {}
         subr_list = {}
         subresponse = {}

@@ -66,4 +66,5 @@ print("\t1) Pulling registered request:", data_shell.InfoStack.request_pull("req
 print("\t2) Getting prepared response:", data_shell.InfoStack.responses["request_1"])
 player_1.name = "OTHER NAME"
 data_shell.InfoStack.register("player", "name", player_1.get_name, "1")
-print("\t3) Getting response after changing player's name:", data_shell.InfoStack.responses["request_1"])
+print("\t3) Getting response after changing player's name:", data_shell.InfoStack.response_pull("request_1"))
+print("\t4) Pulling unregistered response: ", data_shell.InfoStack.response_pull("request_2"))
