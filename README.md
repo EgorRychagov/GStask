@@ -33,7 +33,7 @@ You may not specify `id` if entity is single object
 >response&emsp;=&emsp;{\
 >&emsp;&emsp;&emsp;&emsp;nature&emsp;:&emsp;{id&emsp;:&emsp;{fields&emsp;:&emsp;value_getters}}\
 >&emsp;&emsp;&emsp;&emsp;nature&emsp;:&emsp;{fields&emsp;:&emsp;value_getters}\
->&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;}\
+>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;}
 
 Specify `id` and `fields` in lists to request these fields of several objects
 
